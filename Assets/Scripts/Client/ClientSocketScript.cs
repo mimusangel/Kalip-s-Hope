@@ -19,7 +19,6 @@ public class ClientSocketScript : SocketScript {
 	{
 		byte[] byteBuffer;
 		List<byte> arrayByte = new List<byte>();
-		int indexArray;
 		while(true)
 		{
 			if (_socket == null)
@@ -31,31 +30,25 @@ public class ClientSocketScript : SocketScript {
 				byteBuffer = new byte[_socket.Available];
 				_socket.Receive(byteBuffer, 0, _socket.Available, SocketFlags.None);
 				arrayByte.AddRange(byteBuffer);
-				/*Packet readPacket = new Packet(byteBuffer);
-				if (!PacketHandler.Parses(_socket, readPacket))
-				{
-					Log("Error Packet!");
-					// Erreur Packet !
-				}*/
 			}
-			indexArray = 0;
-			byte[] tmp = arrayByte.ToArray();
-			while (indexArray < arrayByte.Count)
+			while (arrayByte.Count >= 4)
 			{
-				int size = BitConverter.ToInt32(tmp, indexArray);
-				indexArray += 4;
-				byte[] packetArray = new byte[size];
-				Buffer.BlockCopy(tmp, indexArray, packetArray, 0, size);
-				Log(size);
-				Packet readPacket = new Packet(packetArray);
-				if (!PacketHandler.Parses(_socket, readPacket))
+				int size = BitConverter.ToInt32(arrayByte.ToArray(), 0);
+				if (arrayByte.Count >= size + 4)
 				{
-					Log("Error Packet!");
+					arrayByte.RemoveRange(0, 4);
+					byte[] packetArray = new byte[size];
+					Buffer.BlockCopy(arrayByte.ToArray(), 0, packetArray, 0, size);
+					arrayByte.RemoveRange(0, size);
+					Packet readPacket = new Packet(packetArray);
+					if (!PacketHandler.Parses(_socket, readPacket))
+					{
+						Log("Error Packet!");
+					}
 				}
-				indexArray += size;
-				Log("indexArray: " + indexArray + " < " + arrayByte.Count);
+				else
+					break;
 			}
-			arrayByte.Clear();
 			readMutex = false;
 			Thread.Sleep(10);
 		}

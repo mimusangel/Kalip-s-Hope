@@ -84,8 +84,7 @@ public class ServerSocketScript : SocketScript {
 	{
 		List<Socket> readList = new List<Socket>();
 		byte[] byteBuffer;
-		List<byte> arrayByte = new List<byte>();
-		int indexArray;
+		Dictionary<Socket, List<byte>> arrayByte = new Dictionary<Socket, List<byte>>();
 		while(true)
 		{
 			readList.Clear();
@@ -95,36 +94,36 @@ public class ServerSocketScript : SocketScript {
 				Socket.Select(readList, null, null, 1000);
 				foreach(Socket client in readList)
 				{
+					if (!arrayByte.ContainsKey(client))
+					{
+						arrayByte.Add(client, new List<byte>());
+					}
 					while(client.Available > 0)
 					{
 						readMutex = true;
 						byteBuffer = new byte[client.Available];
 						Log("Packet size received: " + client.Available);
 						client.Receive(byteBuffer, 0, client.Available, SocketFlags.None);
-						arrayByte.AddRange(byteBuffer);
-						/*Packet readPacket = new Packet(byteBuffer);
-						if (!PacketHandler.Parses(client, readPacket))
-						{
-							Log("Error Packet!");
-							// Erreur Packet !
-						}*/
+						arrayByte[client].AddRange(byteBuffer);
 					}
-					indexArray = 0;
-					byte[] tmp = arrayByte.ToArray();
-					while (indexArray < arrayByte.Count)
+					while (arrayByte[client].Count >= 4)
 					{
-						int size = BitConverter.ToInt32(tmp, indexArray);
-						indexArray += 4;
-						byte[] packetArray = new byte[size];
-						Buffer.BlockCopy(tmp, indexArray, packetArray, 0, size);
-						Packet readPacket = new Packet(packetArray);
-						if (!PacketHandler.Parses(client, readPacket))
+						int size = BitConverter.ToInt32(arrayByte[client].ToArray(), 0);
+						if (arrayByte[client].Count >= size + 4)
 						{
-							Log("Error Packet!");
+							arrayByte[client].RemoveRange(0, 4);
+							byte[] packetArray = new byte[size];
+							Buffer.BlockCopy(arrayByte[client].ToArray(), 0, packetArray, 0, size);
+							arrayByte[client].RemoveRange(0, size);
+							Packet readPacket = new Packet(packetArray);
+							if (!PacketHandler.Parses(client, readPacket))
+							{
+								Log("Error Packet!");
+							}
 						}
-						indexArray += size;
+						else
+							break;
 					}
-					arrayByte.Clear();
 					readMutex = false;
 				}
 			}
