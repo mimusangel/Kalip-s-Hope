@@ -94,6 +94,11 @@ public class UIMainMenu : MonoBehaviour {
 		{
 			GameObject go = GameObject.Instantiate(prefab, Vector3.zero, Quaternion.identity, allSlot.transform);
 
+			UICharacterSlot UICharac = go.GetComponent<UICharacterSlot>();
+			UICharac.index = charac.Value.index;
+			UICharac.CharacterName.text = charac.Value.name;
+			UICharac.CharacterLevel.text = "Niv. " + charac.Value.level;
+
 			allCharacter.Add(go);
 		}
 
@@ -149,17 +154,18 @@ public class UIMainMenu : MonoBehaviour {
 	{
 		if (GameManager.instance.characters.Count <= 0)
 			return;
-		Character character = null;
+		/*Character character = null;
 		foreach(KeyValuePair<int, Character> charac in GameManager.instance.characters)
 		{
 			character = charac.Value;
 			break;
-		}
+		}*/
 		ClientSocketScript css = GameManager.instance.GetComponent<ClientSocketScript>();
 		css.Send(
 			PacketHandler.newPacket(
 				PacketHandler.PacketID_AccountCharacter,
-				character.index
+				//character.index
+				UICharacterSlot.selected.index
 			)
 		);
 	}
