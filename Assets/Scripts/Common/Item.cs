@@ -12,6 +12,7 @@ public class Item {
     //public Sprite icon;
     public int maxNumber;
     public int number;
+    public int slot;
 
     public List<Effect> stats = new List<Effect>();
 
@@ -27,6 +28,7 @@ public class Item {
         this.stats = stats;
         this.maxNumber = maxNumber;
         this.number = 0;
+        this.slot = -1;
     }
 
     //Item Constructors
@@ -41,9 +43,10 @@ public class Item {
         this.stats = stats;
         this.maxNumber = maxNumber;
         this.number = 1;
+        this.slot = -1;
     }
 
-    public Item(int id, int character, int template, string title, string description, List<Effect> stats, int maxNumber, int number)
+    public Item(int id, int character, int template, string title, string description, List<Effect> stats, int maxNumber, int number, int slot)
     {
         this.id = id;
         this.character = character;
@@ -54,6 +57,7 @@ public class Item {
         this.stats = stats;
         this.maxNumber = maxNumber;
         this.number = number;
+        this.slot = slot;
     }
 
     //Copy Constructor
@@ -70,6 +74,7 @@ public class Item {
             this.stats.Add(new Effect(stat));
         this.maxNumber = item.maxNumber;
         this.number = item.number;
+        this.slot = item.slot;
     }
 
     public Item(Packet reader)
@@ -82,6 +87,7 @@ public class Item {
         maxNumber = reader.ReadInt();
         number = reader.ReadInt();
         stats = Converter.ParseEffects(reader.ReadString());
+        slot = reader.ReadInt();
     }
 
     public void Write(Packet writer)
@@ -94,5 +100,6 @@ public class Item {
         writer.Add(maxNumber);
         writer.Add(number);
         writer.Add(Converter.FormatEffects(stats));
+        writer.Add(slot);
     }
 }

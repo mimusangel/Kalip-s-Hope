@@ -223,8 +223,8 @@ public class ServerClient {
 		_ss.SendTo(_socket, packet);
 
 		// Chargement Inventaire
-		_characters[characterSelected].LoadInventory();
-		Log(_characters[characterSelected].inventory.Count + " items loaded!");
+		_characters[characterSelected].inventory.Load();
+		Log(_characters[characterSelected].inventory.items.Count + " items loaded!");
 
 		// Envoie du Personnage
 		packet = PacketHandler.newPacket(
@@ -239,7 +239,7 @@ public class ServerClient {
 			PacketHandler.PacketID_CharacterInventory,
 			characterSelected
 		);
-		_characters[characterSelected].WriteInventory(packet);
+		_characters[characterSelected].inventory.Write(packet);
 		Log("Inventory Packet Size: " + packet.Size());
 		_ss.SendTo(_socket, packet);
 

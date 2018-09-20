@@ -58,11 +58,11 @@ public class ItemTooltip : MonoBehaviour {
 
     public void AdjustPosition()
     {
-        transform.position = Input.mousePosition;
+        transform.position = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10f));
 
-        float adjustBottom = rectTransform.position.y - rectTransform.sizeDelta.y;
-        float adjustRight = rectTransform.position.x + rectTransform.sizeDelta.x;
-        rectTransform.pivot = new Vector2(adjustRight > Screen.width ? 1.0f : 0.0f, rectTransform.pivot.y);
-        rectTransform.position = new Vector3(transform.position.x + (adjustRight > Screen.width ? -10 : 10), transform.position.y - (adjustBottom < 10 ? adjustBottom : 10), transform.position.z);
+        // float adjustBottom = rectTransform.position.y - rectTransform.sizeDelta.y;
+        // float adjustRight = rectTransform.position.x + rectTransform.sizeDelta.x;
+        // rectTransform.pivot = new Vector2(adjustRight > Screen.width ? 1.0f : 0.0f, rectTransform.pivot.y);
+        // rectTransform.position = new Vector3(transform.position.x + (adjustRight > Screen.width ? -10 : 10), transform.position.y - (adjustBottom < 10 ? adjustBottom : 10), transform.position.z);
     }
 }

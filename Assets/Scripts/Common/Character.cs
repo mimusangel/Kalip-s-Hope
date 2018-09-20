@@ -13,10 +13,12 @@ public class Character
 	public string skillTree {get; private set;}
 	public int life {get; private set;}
 
-	public Dictionary<int, Item> inventory = new Dictionary<int, Item>();
+	public Inventory inventory;
 
 	public Character()
-	{}
+	{
+		inventory = new Inventory(this);
+	}
 
 	public void Read(IDataReader reader)
 	{
@@ -46,42 +48,5 @@ public class Character
 		writer.Add(exp);
 		writer.Add(skillTree);
 		writer.Add(life);
-	}
-
-	public void LoadInventory()
-	{
-		inventory.Clear();
-		IDataReader buffer = DBManager.Select("*", "Item", "character=" + index);
-        while (buffer.Read())
-        {
-            int id = buffer.GetInt32(0);
-            Item template = GameManager.instance.GetItemTemplate(buffer.GetInt32(2));
-            string title = template.title;
-            string description = template.description;
-            string stats = buffer.IsDBNull(3) ? null : buffer.GetString(3);
-            int maxnumber = template.maxNumber;
-            int number = buffer.GetInt32(4);
-            inventory.Add(id, new Item(id, index, template.id, title, description, Converter.ParseEffects(stats), maxnumber, number));
-        }
-	}
-
-	public void WriteInventory(Packet writer)
-	{
-		writer.Add(inventory.Count);
-		foreach(Item item in inventory.Values)
-		{
-			item.Write(writer);
-		}
-	}
-
-	public void ReadInventory(Packet reader)
-	{
-		inventory.Clear();
-		int count = reader.ReadInt();
-		for (int i = 0; i < count; i++)
-		{
-			Item item = new Item(reader);
-			inventory.Add(item.id, item);
-		}
 	}
 }

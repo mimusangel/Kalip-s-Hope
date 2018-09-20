@@ -215,14 +215,14 @@ public class ClientSocketScript : SocketScript {
 		int charID = packet.ReadInt();
 		if (GameManager.instance.characters.ContainsKey(charID))
 		{
-			GameManager.instance.characters[charID].ReadInventory(packet);
+			GameManager.instance.characters[charID].inventory.Read(packet);
 			_dispatcher.Invoke(() => {
-				foreach(Item item in GameManager.instance.characters[charID].inventory.Values)
+				foreach(Item item in GameManager.instance.characters[charID].inventory.items.Values)
 				{
 					UIInventory.instance.AddItem(item);
 				}
 			});
-			Debug.Log(GameManager.instance.characters[charID].inventory.Count + " Item in Inventory Received!");
+			Debug.Log(GameManager.instance.characters[charID].inventory.items.Count + " Item in Inventory Received!");
 		}
 	}	
 
