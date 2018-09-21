@@ -14,6 +14,17 @@ public class ServerSocketScript : SocketScript {
 	Dictionary<Socket, ServerClient> _clientsTable = new Dictionary<Socket, ServerClient>();
 	List<Socket> _clientsSocket = new List<Socket>();
 	public static bool	readMutex = false;
+
+	public Character GetCharacterByName(string name)
+	{
+		foreach(ServerClient sc in _clientsTable.Values)
+		{
+			Character charac = sc.GetConnectedCharacter();
+			if (charac != null && charac.name == name)
+				return (charac);
+		}
+		return (null);
+	}
 	override public void Run()
 	{
 		try {

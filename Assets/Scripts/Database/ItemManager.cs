@@ -6,30 +6,40 @@ using UnityEngine;
 
 public static class ItemManager {
 
-    public static Item CreateNewItem(int id, Character character)
+    public static bool CreateNewItem(int id, Character character)
     {
         Item template;
         Item item = null;
+        int slot; 
 
-        //TODO GET SLOT
         GameManager.instance.itemTemplates.TryGetValue(id, out template);
         if (template != null)
-        {
-            item = new Item(template);
-            item.character = character.index;
-            item.template = id;
-            item.slot = 0; // TODO GET SLOT
-            GenerateStats(ref item.stats);
-            string formatedStats = Converter.FormatEffects(item.stats);
-            string values = item.character + ", " + item.template + ", '" + formatedStats + "'";
-            DBManager.Insert("Item", "character, template, stats", values);
-            item.id = DBManager.LastInsertID("Item");
+        { 
+            slot = character.inventory.FindAvaibleSlot(template);
+            if (slot == -1)
+                return (false);
 
-            // Dictionary<int, Item> characterItems;
-            // charactersItems.TryGetValue(character, out characterItems);
-            // characterItems.Add(item.id, item);
+            if (character.inventory.slots[slot] == null)
+            {
+                item = new Item(template);
+                item.character = character.index;
+                item.template = id;
+                item.slot = slot;
+                item.number = 1;
+                GenerateStats(ref item.stats);
+                string formatedStats = Converter.FormatEffects(item.stats);
+                string values = item.character + ", " + item.template + ", '" + formatedStats + "', " + item.number + ", " + slot;
+                DBManager.Insert("Item", "character, template, stats, number, slot", values);
+                item.id = DBManager.LastInsertID("Item");
+            }
+            else
+            {
+                character.inventory.slots[slot].number++;
+                DBManager.Update("Item", "number = " + character.inventory.slots[slot].number, "slot = " + slot);
+            }
+            return (true);
         }
-        return (item);
+        return (false);
     }
 
     private static void GenerateStats(ref List<Effect> stats)

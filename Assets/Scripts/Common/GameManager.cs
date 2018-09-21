@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class GameManager : MonoBehaviour {
 	public enum Side {None, Client, Server};
@@ -177,6 +178,20 @@ public class GameManager : MonoBehaviour {
 		{
 			if (textCMD.Length > 0)
 			{
+				string[] args = textCMD.Split(' ');
+				if (args.Length > 0)
+				{
+					if (args[0].ToLower() == "item" && args.Length >= 3)//item templateID characterName
+					{
+						int templateID = Convert.ToInt32(args[1]);
+						string name = args[2].ToLower();
+						Character charac = sss.GetCharacterByName(name);
+						if (charac != null && ItemManager.CreateNewItem(templateID, charac))
+							sss.Log("Added Item " + templateID + "  to " + charac.name);
+						else
+							sss.Log("Add Item " + templateID + " failed");
+					}
+				}
 				/* COMMANDE SERVER */
 				textCMD = "";
 			}

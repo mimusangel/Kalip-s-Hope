@@ -208,14 +208,14 @@ public class ClientSocketScript : SocketScript {
 		int charID = packet.ReadInt();
 		if (GameManager.instance.characters.ContainsKey(charID))
 		{
-			GameManager.instance.characters[charID].inventory.Read(packet);
+			int nb = GameManager.instance.characters[charID].inventory.Read(packet);
 			_dispatcher.Invoke(() => {
-				foreach(Item item in GameManager.instance.characters[charID].inventory.items.Values)
+				foreach(Item item in GameManager.instance.characters[charID].inventory.slots.Values)
 				{
 					UIInventory.instance.AddItem(item);
 				}
 			});
-			Debug.Log(GameManager.instance.characters[charID].inventory.items.Count + " Item in Inventory Received!");
+			Debug.Log(nb + " Item in Inventory Received!");
 		}
 	}	
 

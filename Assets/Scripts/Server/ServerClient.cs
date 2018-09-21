@@ -47,6 +47,13 @@ public class ServerClient {
 		Log("déconnecté!");
 	}
 
+	public Character GetConnectedCharacter()
+	{
+		if (characterSelected >= 0)
+			return _characters[characterSelected];
+		return null;
+	}
+
 	public string GetName()
 	{
 		if (characterSelected >= 0)
@@ -223,8 +230,8 @@ public class ServerClient {
 		_ss.SendTo(_socket, packet);
 
 		// Chargement Inventaire
-		_characters[characterSelected].inventory.Load();
-		Log(_characters[characterSelected].inventory.items.Count + " items loaded!");
+		int nb = _characters[characterSelected].inventory.Load();
+		Log(nb + " items loaded!");
 
 		// Envoie du Personnage
 		packet = PacketHandler.newPacket(

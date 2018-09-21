@@ -6,27 +6,35 @@ using System.Data;
 public class Inventory {
 
     public Character character {get; private set;}
-    public Dictionary<int, Item> items = new Dictionary<int, Item>();
-    public int slotsNb = 24;
+    public Dictionary<int, Item> slots = new Dictionary<int, Item>();//Key = item.slot
+    public int size = 24;
 
     public Inventory(Character character)
     {
         this.character = character;
     }
 
-    public void AddItem(Item item)
+    private void InitializeSlots()
     {
-        if (items.Count < this.slotsNb)
+        slots.Clear();
+        for (int i = 0; i < size; i++)
+            slots.Add(i, null);
+    }
+
+    /*public void AddItem(Item item)
+    {
+        if (items.Count < this.size)
         {
             items.Add(item.id, item);
             UIInventory.instance.AddItem(item);
         }
-    }
+    }*/
 
-    public void Load()
+    public int Load()
 	{
-		items.Clear();
+		InitializeSlots();
 		IDataReader buffer = DBManager.Select("*", "Item", "character=" + character.index);
+        int i = 0;
         while (buffer.Read())
         {
             int id = buffer.GetInt32(0);
@@ -37,28 +45,42 @@ public class Inventory {
             int maxnumber = template.maxNumber;
             int number = buffer.GetInt32(4);
 			int slot = buffer.GetInt32(5);
-            items.Add(id, new Item(id, character.index, template.id, title, description, Converter.ParseEffects(stats), maxnumber, number, slot));
+            slots[slot] = new Item(id, character.index, template.id, title, description, Converter.ParseEffects(stats), maxnumber, number, slot);
+            // slots.Add(slot, new Item(id, character.index, template.id, title, description, Converter.ParseEffects(stats), maxnumber, number, slot));
+            i++;
         }
+        return (i);
 	}
 
     public int FindAvaibleSlot(Item item)
 	{
-		if (items.Count < this.slotsNb)
+        int freeSlot = -1;
+        Item slot;
+
+        for (int i = 0; i < size; i++)
         {
-            // TODO
+            slots.TryGetValue(i, out slot);
+            if (slot == null)
+            {
+                if (item.maxNumber <= 1)//Si l'item ne se stack pas, on retourne l'index du slot libre
+                    return (i);
+                if (freeSlot == -1)//Sinon on l'enregistre
+                    freeSlot = i;
+            }
+            else if (item.maxNumber > 1 && slot.template == item.template)//Si l'item peut se stack et que le slot correspond, on retourne l'index du slot
+                return (i);
         }
-            return (UIInventory.instance.FindSlot(item));
-        return (-1);
+        return (freeSlot);//Aucun slot libre: freeSlot = -1; Si l'item se stack et qu'on a pas trouvé d'item correspondant: freeSlot = premier slot libre
 	}
 
     /*public void AddItem(int id)
     {
-        if (items.Count >= this.slotsNb)
+        if (slots.Count >= this.slotsNb)
             return;
         Item item = ItemManager.CreateNewItem(id, );
         if (item != null)
         {
-            items.Add(item.id, item);
+            slots.Add(item.id, item);
             UIInventory.instance.AddItem(item);
             Debug.Log("Objet ajouté : " + item.title);
         }
@@ -67,7 +89,7 @@ public class Inventory {
     public Item GetItem(int id)
     {
         Item item;
-        items.TryGetValue(id, out item);
+        slots.TryGetValue(id, out item);
         return (item);
     }
 
@@ -76,7 +98,7 @@ public class Inventory {
         Item item = GetItem(id);
         if (item != null)
         {
-            items.Remove(item.id);
+            slots.Remove(item.id);
             UIInventory.instance.RemoveItem(item);
             Debug.Log("Objet retiré : " + item.title);
         }
@@ -84,21 +106,25 @@ public class Inventory {
 
     public void Write(Packet writer)
 	{
-		writer.Add(items.Count);
-		foreach(Item item in items.Values)
+		writer.Add(slots.Count);
+		foreach(Item item in slots.Values)
 		{
 			item.Write(writer);
 		}
 	}
 
-	public void Read(Packet reader)
+	public int Read(Packet reader)
 	{
-		items.Clear();
+        int nb = 0;
+		InitializeSlots();
 		int count = reader.ReadInt();
 		for (int i = 0; i < count; i++)
 		{
 			Item item = new Item(reader);
-			items.Add(item.id, item);
+            slots[item.slot] = item;
+			// slots.Add(item.slot, item);
+            nb++;
 		}
+        return (nb);
 	}
 }

@@ -73,7 +73,7 @@ public static class DBManager {
 		if (dbconn == null)
 			OpenDataBase();
 		IDbCommand cmd = dbconn.CreateCommand();
-		cmd.CommandText = "UPDATE " + table + " SET (" + values + ") WHERE " + where;
+		cmd.CommandText = "UPDATE " + table + " SET " + values + " WHERE " + where;
 		Debug.Log(cmd.CommandText);
 		if (transaction != null)
 			cmd.ExecuteNonQuery();
