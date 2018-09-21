@@ -10,12 +10,10 @@ public class UIItem : MonoBehaviour, IPointerDownHandler, IPointerEnterHandler, 
     private Image _spriteImage;
     private UIItem _selectedItem;
     private Text _number;
-    private ItemTooltip _tooltip;
 
     private void Awake()
     {
         _selectedItem = GameObject.Find("SelectedItem").GetComponent<UIItem>();
-        _tooltip = GameObject.Find("Tooltip").GetComponent<ItemTooltip>();
         _spriteImage = GetComponent<Image>();
         _number = GetComponentInChildren<Text>();
         UpdateItem(null);
@@ -67,12 +65,12 @@ public class UIItem : MonoBehaviour, IPointerDownHandler, IPointerEnterHandler, 
     {
         if (this.item != null)
         {
-            _tooltip.GenerateTooltip(this.item);
+            ItemTooltip.instance.GenerateTooltip(this.item);
         }
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        _tooltip.gameObject.SetActive(false);
+        ItemTooltip.instance.gameObject.SetActive(false);
     }
 }

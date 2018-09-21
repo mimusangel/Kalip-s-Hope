@@ -130,6 +130,7 @@ public class ClientSocketScript : SocketScript {
 		PacketHandler.packetList.Add(PacketHandler.PacketID_ListItemTemplate, Packet_ItemTemplate); // Serv => Client
 		PacketHandler.packetList.Add(PacketHandler.PacketID_Character, Packet_Character); // Serv => Client
 		PacketHandler.packetList.Add(PacketHandler.PacketID_CharacterInventory, Packet_CharacterInventory); // Serv => Client
+		PacketHandler.packetList.Add(PacketHandler.PacketID_CharacterItem, Packet_CharacterItem); // Serv => Client
 
 		// Chat/Message/Popup
 		PacketHandler.packetList.Add(PacketHandler.PacketID_Chat, Packet_Chat); // Serv <=> Client (int, [int], string)
@@ -210,14 +211,24 @@ public class ClientSocketScript : SocketScript {
 		{
 			int nb = GameManager.instance.characters[charID].inventory.Read(packet);
 			_dispatcher.Invoke(() => {
-				foreach(Item item in GameManager.instance.characters[charID].inventory.slots.Values)
-				{
-					UIInventory.instance.AddItem(item);
-				}
+				UIInventory.instance.Initialize(GameManager.instance.characters[charID].inventory);
 			});
 			Debug.Log(nb + " Item in Inventory Received!");
 		}
-	}	
+	}
+
+	void Packet_CharacterItem(Socket sender, Packet packet)
+	{
+		int charID = packet.ReadInt();
+		if (GameManager.instance.characters.ContainsKey(charID))
+		{
+			Item item = GameManager.instance.characters[charID].inventory.AddItem(packet);
+			_dispatcher.Invoke(() => {
+				UIInventory.instance.UpdateSlot(item.slot, item);
+			});
+			Debug.Log("Item " + item.template + " Received!");
+		}
+	}
 
 
 

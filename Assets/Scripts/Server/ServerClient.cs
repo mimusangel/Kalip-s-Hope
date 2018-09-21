@@ -47,10 +47,10 @@ public class ServerClient {
 		Log("déconnecté!");
 	}
 
-	public Character GetConnectedCharacter()
+	public string GetCharacterName()
 	{
 		if (characterSelected >= 0)
-			return _characters[characterSelected];
+			return _characters[characterSelected].name;
 		return null;
 	}
 
@@ -312,6 +312,31 @@ public class ServerClient {
 				)
 			);
 		}
+	}
+	
+	public void CreateAndSendItem(int templateID)
+	{
+		Character charac = _characters[characterSelected];
+		if (charac != null)
+		{
+			Item item = ItemManager.CreateNewItem(templateID, charac);
+			if (item != null)
+			{
+				Packet packet = PacketHandler.newPacket(
+					PacketHandler.PacketID_CharacterItem,
+					characterSelected
+				);
+				item.Write(packet);
+				Log("Item Packet Size: " + packet.Size());
+				_ss.SendTo(_socket, packet);
+				Log("SUCCESS Add Item " + templateID + "  to " + charac.name);
+
+			}
+			else
+				Log("FAIL Add Item : item creation failed");
+		}
+		else
+			Log("FAIL Add Item : charac == null");
 	}
 
 	public string ParseMsg(string msg) // Permet de faire une sorte de BBCode

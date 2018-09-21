@@ -8,6 +8,13 @@ public class Inventory {
     public Character character {get; private set;}
     public Dictionary<int, Item> slots = new Dictionary<int, Item>();//Key = item.slot
     public int size = 24;
+    public int itemNb = 0;
+
+    /*
+	 * ************************** *
+	 * ***     BOTH SIDES     *** *
+	 * ************************** *
+	*/
 
     public Inventory(Character character)
     {
@@ -16,25 +23,22 @@ public class Inventory {
 
     private void InitializeSlots()
     {
+        itemNb = 0;
         slots.Clear();
         for (int i = 0; i < size; i++)
             slots.Add(i, null);
     }
 
-    /*public void AddItem(Item item)
-    {
-        if (items.Count < this.size)
-        {
-            items.Add(item.id, item);
-            UIInventory.instance.AddItem(item);
-        }
-    }*/
+    /*
+	 * ************************** *
+	 * ***    SERVER SIDE     *** *
+	 * ************************** *
+	*/
 
     public int Load()
 	{
 		InitializeSlots();
 		IDataReader buffer = DBManager.Select("*", "Item", "character=" + character.index);
-        int i = 0;
         while (buffer.Read())
         {
             int id = buffer.GetInt32(0);
@@ -46,9 +50,9 @@ public class Inventory {
             int number = buffer.GetInt32(4);
 			int slot = buffer.GetInt32(5);
             slots[slot] = new Item(id, character.index, template.id, title, description, Converter.ParseEffects(stats), canStack, number, slot);
-            i++;
+            itemNb++;
         }
-        return (i);
+        return (itemNb);
 	}
 
     public int FindAvaibleSlot(Item item)
@@ -72,57 +76,47 @@ public class Inventory {
         return (freeSlot);//Aucun slot libre: freeSlot = -1; Si l'item se stack et qu'on a pas trouvé d'item correspondant: freeSlot = premier slot libre
 	}
 
-    /*public void AddItem(int id)
-    {
-        if (slots.Count >= this.slotsNb)
-            return;
-        Item item = ItemManager.CreateNewItem(id, );
-        if (item != null)
-        {
-            slots.Add(item.id, item);
-            UIInventory.instance.AddItem(item);
-            Debug.Log("Objet ajouté : " + item.title);
-        }
-    }
+    /*
+	 * ************************** *
+	 * ***    CLIENT SIDE     *** *
+	 * ************************** *
+	*/
 
-    public Item GetItem(int id)
+    public Item AddItem(Packet reader)
     {
-        Item item;
-        slots.TryGetValue(id, out item);
+        Item item = new Item(reader);
+        if (slots[item.slot] == null)
+            itemNb++;
+        slots[item.slot] = item;
         return (item);
     }
 
-    public void RemoveItem(int id)
-    {
-        Item item = GetItem(id);
-        if (item != null)
-        {
-            slots.Remove(item.id);
-            UIInventory.instance.RemoveItem(item);
-            Debug.Log("Objet retiré : " + item.title);
-        }
-    }*/
+    /*
+	 * ************************** *
+	 * ***      PACKETS       *** *
+	 * ************************** *
+	*/
 
     public void Write(Packet writer)
 	{
-		writer.Add(slots.Count);
+		writer.Add(itemNb);
 		foreach(Item item in slots.Values)
 		{
-			item.Write(writer);
+            if (item != null)
+			    item.Write(writer);
 		}
 	}
 
 	public int Read(Packet reader)
 	{
-        int nb = 0;
 		InitializeSlots();
 		int count = reader.ReadInt();
 		for (int i = 0; i < count; i++)
 		{
 			Item item = new Item(reader);
             slots[item.slot] = item;
-            nb++;
+            itemNb++;
 		}
-        return (nb);
+        return (itemNb);
 	}
 }

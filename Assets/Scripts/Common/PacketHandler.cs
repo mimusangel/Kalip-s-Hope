@@ -21,6 +21,7 @@ class PacketHandler {
 	public const int PacketID_CharacterInventory = 11; // Envoie l'inventaire du joueur
 	public const int PacketID_CharacterSkillTree = 12; // Envoie l'arbre des competences/spell
 	public const int PacketID_CharacterSkillBook = 13; // Envoie la list des spells
+	public const int PacketID_CharacterItem = 14; // Envoie d'un item au joueur
 
 	public const int PacketID_Chat = 50;
 	public const int PacketID_Popup = 51;

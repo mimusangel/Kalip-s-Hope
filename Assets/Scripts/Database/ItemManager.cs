@@ -6,7 +6,7 @@ using UnityEngine;
 
 public static class ItemManager {
 
-    public static bool CreateNewItem(int id, Character character)
+    public static Item CreateNewItem(int id, Character character)
     {
         Item template;
         Item item = null;
@@ -17,7 +17,7 @@ public static class ItemManager {
         { 
             slot = character.inventory.FindAvaibleSlot(template);
             if (slot == -1)
-                return (false);
+                return (null);
 
             if (character.inventory.slots[slot] == null)
             {
@@ -31,15 +31,17 @@ public static class ItemManager {
                 string values = item.character + ", " + item.template + ", '" + formatedStats + "', " + item.number + ", " + slot;
                 DBManager.Insert("Item", "character, template, stats, number, slot", values);
                 item.id = DBManager.LastInsertID("Item");
+                character.inventory.slots[slot] = item;
+                return (item);
             }
             else
             {
                 character.inventory.slots[slot].number++;
                 DBManager.Update("Item", "number = " + character.inventory.slots[slot].number, "slot = " + slot);
+                return (character.inventory.slots[slot]);
             }
-            return (true);
         }
-        return (false);
+        return (null);
     }
 
     private static void GenerateStats(ref List<Effect> stats)

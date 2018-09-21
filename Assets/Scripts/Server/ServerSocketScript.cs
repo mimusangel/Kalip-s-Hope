@@ -15,16 +15,6 @@ public class ServerSocketScript : SocketScript {
 	List<Socket> _clientsSocket = new List<Socket>();
 	public static bool	readMutex = false;
 
-	public Character GetCharacterByName(string name)
-	{
-		foreach(ServerClient sc in _clientsTable.Values)
-		{
-			Character charac = sc.GetConnectedCharacter();
-			if (charac != null && charac.name == name)
-				return (charac);
-		}
-		return (null);
-	}
 	override public void Run()
 	{
 		try {
@@ -258,6 +248,19 @@ public class ServerSocketScript : SocketScript {
 		}
 		return null;
 	}
+
+	public ServerClient GetServerClientByName(string name)
+	{
+		if (name != null)
+		{
+			foreach(ServerClient sc in _clientsTable.Values)
+			{
+				if (sc.GetCharacterName() == name)
+					return (sc);
+			}
+		}
+		return (null);
+	}
 	
 	/*
 	 * ************************** *
@@ -277,6 +280,7 @@ public class ServerSocketScript : SocketScript {
 		//PacketHandler.packetList.Add(PacketHandler.PacketID_ListItemTemplate, Packet_ItemTemplate); // Serv => Client
 		// PacketHandler.packetList.Add(PacketHandler.PacketID_Character, Packet_Character); // Serv => Client
 		// PacketHandler.packetList.Add(PacketHandler.PacketID_CharacterInventory, PacketID_CharacterInventory); // Serv => Client
+		//PacketHandler.packetList.Add(PacketHandler.PacketID_CharacterItem, Packet_CharacterItem); // Serv => Client
 
 
 		// Chat/Message/Popup

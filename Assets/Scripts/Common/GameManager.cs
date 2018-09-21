@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Net.Sockets;
 
 public class GameManager : MonoBehaviour {
 	public enum Side {None, Client, Server};
@@ -183,13 +184,12 @@ public class GameManager : MonoBehaviour {
 				{
 					if (args[0].ToLower() == "item" && args.Length >= 3)//item templateID characterName
 					{
-						int templateID = Convert.ToInt32(args[1]);
-						string name = args[2].ToLower();
-						Character charac = sss.GetCharacterByName(name);
-						if (charac != null && ItemManager.CreateNewItem(templateID, charac))
-							sss.Log("Added Item " + templateID + "  to " + charac.name);
+						string characterName = Convert.ToString(args[2]);
+						ServerClient sc = sss.GetServerClientByName(characterName);
+						if (sc != null)
+							sc.CreateAndSendItem(Convert.ToInt32(args[1]));
 						else
-							sss.Log("Add Item " + templateID + " failed");
+							sss.Log("FAIL Add Item : " + characterName + " not found");
 					}
 				}
 				/* COMMANDE SERVER */

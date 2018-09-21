@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class ItemTooltip : MonoBehaviour {
-
+    public static ItemTooltip instance {get; private set;}
     public static Dictionary<string, string> Colors = new Dictionary<string, string> {
         {"rouge", "<color=#aa0000ff>" },
         {"vert", "<color=#00cc00ff>" },
@@ -20,6 +20,11 @@ public class ItemTooltip : MonoBehaviour {
     
     private Text tooltip;
     private RectTransform rectTransform; 
+
+    void Awake()
+    {
+        instance = this;
+    }
     
     void Start () {
         tooltip = GetComponentInChildren<Text>();
