@@ -66,7 +66,7 @@ public class ServerSocketScript : SocketScript {
             string title = buffer.GetString(1);
             string description = buffer.GetString(2);
             string stats = buffer.IsDBNull(3) ? null : buffer.GetString(3);
-            int maxNumber = buffer.GetInt32(4);
+            bool maxNumber = buffer.GetBoolean(4);
 			GameManager.instance.itemTemplates.Add(id, new Item(id, title, description, Converter.ParseEffects(stats), maxNumber));
         }
         Log(GameManager.instance.itemTemplates.Count + " Item Template chargés.");

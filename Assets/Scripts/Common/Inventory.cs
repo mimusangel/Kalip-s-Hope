@@ -42,11 +42,10 @@ public class Inventory {
             string title = template.title;
             string description = template.description;
             string stats = buffer.IsDBNull(3) ? null : buffer.GetString(3);
-            int maxnumber = template.maxNumber;
+            bool canStack = template.canStack;
             int number = buffer.GetInt32(4);
 			int slot = buffer.GetInt32(5);
-            slots[slot] = new Item(id, character.index, template.id, title, description, Converter.ParseEffects(stats), maxnumber, number, slot);
-            // slots.Add(slot, new Item(id, character.index, template.id, title, description, Converter.ParseEffects(stats), maxnumber, number, slot));
+            slots[slot] = new Item(id, character.index, template.id, title, description, Converter.ParseEffects(stats), canStack, number, slot);
             i++;
         }
         return (i);
@@ -62,12 +61,12 @@ public class Inventory {
             slots.TryGetValue(i, out slot);
             if (slot == null)
             {
-                if (item.maxNumber <= 1)//Si l'item ne se stack pas, on retourne l'index du slot libre
+                if (!item.canStack)//Si l'item ne se stack pas, on retourne l'index du slot libre
                     return (i);
                 if (freeSlot == -1)//Sinon on l'enregistre
                     freeSlot = i;
             }
-            else if (item.maxNumber > 1 && slot.template == item.template)//Si l'item peut se stack et que le slot correspond, on retourne l'index du slot
+            else if (item.canStack && slot.template == item.template)//Si l'item peut se stack et que le slot correspond, on retourne l'index du slot
                 return (i);
         }
         return (freeSlot);//Aucun slot libre: freeSlot = -1; Si l'item se stack et qu'on a pas trouvé d'item correspondant: freeSlot = premier slot libre
@@ -122,7 +121,6 @@ public class Inventory {
 		{
 			Item item = new Item(reader);
             slots[item.slot] = item;
-			// slots.Add(item.slot, item);
             nb++;
 		}
         return (nb);
