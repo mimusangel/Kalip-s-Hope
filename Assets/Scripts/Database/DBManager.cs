@@ -104,6 +104,24 @@ public static class DBManager {
 		cmd = null;
 	}
 
+	public static void Delete(string table, string where)
+	{
+		if (dbconn == null)
+			OpenDataBase();
+		IDbCommand cmd = dbconn.CreateCommand();
+		cmd.CommandText = "DELETE FROM " + table + " WHERE " + where;
+		Debug.Log(cmd.CommandText);
+		if (transaction != null)
+			cmd.ExecuteNonQuery();
+		else
+		{
+			IDataReader reader = cmd.ExecuteReader();
+			reader.Close();
+		}
+		cmd.Dispose();
+		cmd = null;
+	}
+
 	public static void Prepare()
 	{
 		if (dbconn == null)

@@ -41,6 +41,11 @@ public class UIInventory : MonoBehaviour {
         uiItems[slot].UpdateItem(item);
     }
 
+    public void UpdateSlot(int slot)
+    {
+        uiItems[slot].UpdateItem(_inventory.slots[slot]);
+    }
+
     public void AddItem(Item item)
     {
         if (item.slot == -1)

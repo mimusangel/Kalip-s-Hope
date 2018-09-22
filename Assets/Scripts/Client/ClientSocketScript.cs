@@ -130,7 +130,10 @@ public class ClientSocketScript : SocketScript {
 		PacketHandler.packetList.Add(PacketHandler.PacketID_ListItemTemplate, Packet_ItemTemplate); // Serv => Client
 		PacketHandler.packetList.Add(PacketHandler.PacketID_Character, Packet_Character); // Serv => Client
 		PacketHandler.packetList.Add(PacketHandler.PacketID_CharacterInventory, Packet_CharacterInventory); // Serv => Client
-		PacketHandler.packetList.Add(PacketHandler.PacketID_CharacterItem, Packet_CharacterItem); // Serv => Client
+
+		//Item Packet
+		PacketHandler.packetList.Add(PacketHandler.PacketID_AddItem, Packet_AddItem); // Serv => Client
+		PacketHandler.packetList.Add(PacketHandler.PacketID_RemoveItem, Packet_RemoveItem); // Serv => Client
 
 		// Chat/Message/Popup
 		PacketHandler.packetList.Add(PacketHandler.PacketID_Chat, Packet_Chat); // Serv <=> Client (int, [int], string)
@@ -217,7 +220,9 @@ public class ClientSocketScript : SocketScript {
 		}
 	}
 
-	void Packet_CharacterItem(Socket sender, Packet packet)
+	/* *** Item *** */
+
+	void Packet_AddItem(Socket sender, Packet packet)
 	{
 		int charID = packet.ReadInt();
 		if (GameManager.instance.characters.ContainsKey(charID))
@@ -227,6 +232,23 @@ public class ClientSocketScript : SocketScript {
 				UIInventory.instance.UpdateSlot(item.slot, item);
 			});
 			Debug.Log("Item " + item.template + " Received!");
+		}
+	}
+
+	void Packet_RemoveItem(Socket sender, Packet packet)
+	{
+		int charID = packet.ReadInt();
+		if (GameManager.instance.characters.ContainsKey(charID))
+		{
+			int slot = packet.ReadInt();
+        	int quantity = packet.ReadInt();
+			if (GameManager.instance.characters[charID].inventory.RemoveItem(slot, quantity))
+			{
+				_dispatcher.Invoke(() => {
+					UIInventory.instance.UpdateSlot(slot);
+				});
+				Debug.Log("Item on slot " + slot + " Removed!");
+			}
 		}
 	}
 

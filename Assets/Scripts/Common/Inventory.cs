@@ -29,6 +29,81 @@ public class Inventory {
             slots.Add(i, null);
     }
 
+    public int FindAvaibleSlot(Item item)
+	{
+        int freeSlot = -1;
+        Item slot;
+
+        for (int i = 0; i < size; i++)
+        {
+            slots.TryGetValue(i, out slot);
+            if (slot == null)
+            {
+                if (!item.canStack)//Si l'item ne se stack pas, on retourne l'index du slot libre
+                    return (i);
+                if (freeSlot == -1)//Sinon on l'enregistre
+                    freeSlot = i;
+            }
+            else if (item.canStack && slot.template == item.template)//Si l'item peut se stack et que le slot correspond, on retourne l'index du slot
+                return (i);
+        }
+        return (freeSlot);//Aucun slot libre: freeSlot = -1; Si l'item se stack et qu'on a pas trouvé d'item correspondant: freeSlot = premier slot libre
+	}
+
+    public Item FindItemById(int id)
+    {
+        foreach(Item item in slots.Values)
+		{
+            if (item != null && item.id == id)
+			    return (item);
+		}
+        return (null);
+    }
+
+    public Item FindItemByTemplate(int templateID)
+    {
+        foreach(Item item in slots.Values)
+		{
+            if (item != null && item.template == templateID)
+			    return (item);
+		}
+        return (null);
+    }
+
+    public List<Item> FindItemsByTemplate(int templateID)
+    {
+        List<Item> items = new List<Item>();
+
+        foreach(Item item in slots.Values)
+		{
+            if (item != null && item.template == templateID)
+			    items.Add(item);
+		}
+        return (items);
+    }
+
+    public Item FindItemBySlot(int slotID)
+    {
+        if (slotID >= 0 && slotID < size)
+            return (slots[slotID]);
+        return (null);
+    }
+
+    public Item FindItem(int id, int type = 0)
+    {
+        switch (type)
+        {
+            case 1:
+                return (FindItemByTemplate(id));
+
+            case 2:
+                return (FindItemBySlot(id));
+
+            default:
+                return (FindItemById(id));
+        }
+    }
+
     /*
 	 * ************************** *
 	 * ***    SERVER SIDE     *** *
@@ -55,27 +130,6 @@ public class Inventory {
         return (itemNb);
 	}
 
-    public int FindAvaibleSlot(Item item)
-	{
-        int freeSlot = -1;
-        Item slot;
-
-        for (int i = 0; i < size; i++)
-        {
-            slots.TryGetValue(i, out slot);
-            if (slot == null)
-            {
-                if (!item.canStack)//Si l'item ne se stack pas, on retourne l'index du slot libre
-                    return (i);
-                if (freeSlot == -1)//Sinon on l'enregistre
-                    freeSlot = i;
-            }
-            else if (item.canStack && slot.template == item.template)//Si l'item peut se stack et que le slot correspond, on retourne l'index du slot
-                return (i);
-        }
-        return (freeSlot);//Aucun slot libre: freeSlot = -1; Si l'item se stack et qu'on a pas trouvé d'item correspondant: freeSlot = premier slot libre
-	}
-
     /*
 	 * ************************** *
 	 * ***    CLIENT SIDE     *** *
@@ -89,6 +143,28 @@ public class Inventory {
             itemNb++;
         slots[item.slot] = item;
         return (item);
+    }
+
+    public bool RemoveItem(int slot, int quantity)
+    {
+        Item item;
+
+        if (slot >= 0 && slot < size && slots[slot] != null)
+        {
+            item = slots[slot];
+            if (item.number - quantity <= 0)
+            {
+                slots[slot] = null;
+                item = null;
+                itemNb--;
+            }
+            else
+            {
+                item.number -= quantity;
+            }
+            return (true);
+        }
+        return (false);
     }
 
     /*

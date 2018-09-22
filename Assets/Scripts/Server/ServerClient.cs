@@ -314,22 +314,22 @@ public class ServerClient {
 		}
 	}
 	
-	public void CreateAndSendItem(int templateID)
+	public void CreateAndSendItem(int templateID, int quantity = 1)
 	{
 		Character charac = _characters[characterSelected];
 		if (charac != null)
 		{
-			Item item = ItemManager.CreateNewItem(templateID, charac);
+			Item item = ItemManager.CreateNewItem(templateID, charac, quantity);
 			if (item != null)
 			{
 				Packet packet = PacketHandler.newPacket(
-					PacketHandler.PacketID_CharacterItem,
+					PacketHandler.PacketID_AddItem,
 					characterSelected
 				);
 				item.Write(packet);
-				Log("Item Packet Size: " + packet.Size());
+				Log("Add Item Packet Size: " + packet.Size());
 				_ss.SendTo(_socket, packet);
-				Log("SUCCESS Add Item " + templateID + "  to " + charac.name);
+				Log("SUCCESS Add Item " + templateID + " to " + charac.name);
 
 			}
 			else
@@ -337,6 +337,31 @@ public class ServerClient {
 		}
 		else
 			Log("FAIL Add Item : charac == null");
+	}
+
+	public void RemoveItem(int id, int type = 0, int quantity = 1)
+	{
+		Character charac = _characters[characterSelected];
+		Item item;
+		if (charac != null)
+		{
+			item = charac.inventory.FindItem(id, type);
+			if (item != null)
+			{
+				ItemManager.RemoveItem(item, charac, quantity);
+				Packet packet = PacketHandler.newPacket(
+					PacketHandler.PacketID_RemoveItem,
+					characterSelected,
+					item.slot,
+					quantity
+				);
+				Log("Remove Item Packet Size: " + packet.Size());
+				_ss.SendTo(_socket, packet);
+				Log("SUCCESS Remove Item " + item.template + " from " + charac.name);
+			}
+		}
+		else
+			Log("FAIL Remove Item : charac == null");
 	}
 
 	public string ParseMsg(string msg) // Permet de faire une sorte de BBCode

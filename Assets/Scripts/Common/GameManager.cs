@@ -182,14 +182,38 @@ public class GameManager : MonoBehaviour {
 				string[] args = textCMD.Split(' ');
 				if (args.Length > 0)
 				{
-					if (args[0].ToLower() == "item" && args.Length >= 3)//item templateID characterName
+					//COMMAND: help
+					if (args[0].ToLower() == "help")
 					{
-						string characterName = Convert.ToString(args[2]);
+						sss.Log("=============== Liste des commandes ===============");
+						sss.Log("Exemple: nom <obligatoire> (optionnel)");
+						sss.Log("item <templateID> <characterName> (quantity) -> Ajoute un item");
+						sss.Log("delitem <ID/templateID/slotID> <characterName> (type) (quantity) -> Retire un item");
+						sss.Log("\ttype {0 = ID, 1 = templateID, 2 = slotID}; Default = ID");
+					}
+					//COMMAND: item <templateID> <characterName> (quantity)
+					if (args.Length >= 3 && args[0].ToLower() == "item")
+					{
+						string characterName = args[2].ToLower();
+						int quantity = args.Length >= 4 ? Convert.ToInt32(args[3]) : 1;
 						ServerClient sc = sss.GetServerClientByName(characterName);
 						if (sc != null)
-							sc.CreateAndSendItem(Convert.ToInt32(args[1]));
+							sc.CreateAndSendItem(Convert.ToInt32(args[1]), quantity);
 						else
 							sss.Log("FAIL Add Item : " + characterName + " not found");
+					}
+					//COMMAND: delitem <ID/templateID/slotID> <characterName> (type) (quantity)
+					// type {0 = ID, 1 = templateID, 2 = slotID}; Default = ID
+					if (args.Length >= 3 && args[0].ToLower() == "delitem")
+					{
+						string characterName = args[2].ToLower();
+						int type = args.Length >= 4 ? Convert.ToInt32(args[3]) : 0;
+						int quantity = args.Length >= 5 ? Convert.ToInt32(args[4]) : 1;
+						ServerClient sc = sss.GetServerClientByName(characterName);
+						if (sc != null)
+							sc.RemoveItem(Convert.ToInt32(args[1]), type, quantity);
+						else
+							sss.Log("FAIL Delete Item : " + characterName + " not found");
 					}
 				}
 				/* COMMANDE SERVER */

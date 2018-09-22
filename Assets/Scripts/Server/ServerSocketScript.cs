@@ -280,7 +280,10 @@ public class ServerSocketScript : SocketScript {
 		//PacketHandler.packetList.Add(PacketHandler.PacketID_ListItemTemplate, Packet_ItemTemplate); // Serv => Client
 		// PacketHandler.packetList.Add(PacketHandler.PacketID_Character, Packet_Character); // Serv => Client
 		// PacketHandler.packetList.Add(PacketHandler.PacketID_CharacterInventory, PacketID_CharacterInventory); // Serv => Client
-		//PacketHandler.packetList.Add(PacketHandler.PacketID_CharacterItem, Packet_CharacterItem); // Serv => Client
+
+		//Item Packet
+		// PacketHandler.packetList.Add(PacketHandler.PacketID_AddItem, Packet_AddItem); // Serv => Client
+		// PacketHandler.packetList.Add(PacketHandler.PacketID_RemoveItem, Packet_RemoveItem); // Serv => Client
 
 
 		// Chat/Message/Popup

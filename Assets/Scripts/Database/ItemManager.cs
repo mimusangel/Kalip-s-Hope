@@ -6,15 +6,15 @@ using UnityEngine;
 
 public static class ItemManager {
 
-    public static Item CreateNewItem(int id, Character character)
+    public static Item CreateNewItem(int id, Character character, int quantity = 1)
     {
         Item template;
         Item item = null;
-        int slot; 
+        int slot;
 
         GameManager.instance.itemTemplates.TryGetValue(id, out template);
         if (template != null)
-        { 
+        {
             slot = character.inventory.FindAvaibleSlot(template);
             if (slot == -1)
                 return (null);
@@ -25,23 +25,39 @@ public static class ItemManager {
                 item.character = character.index;
                 item.template = id;
                 item.slot = slot;
-                item.number = 1;
+                item.number = (quantity > 1 && template.canStack) ? quantity : 1;
                 GenerateStats(ref item.stats);
                 string formatedStats = Converter.FormatEffects(item.stats);
                 string values = item.character + ", " + item.template + ", '" + formatedStats + "', " + item.number + ", " + slot;
                 DBManager.Insert("Item", "character, template, stats, number, slot", values);
                 item.id = DBManager.LastInsertID("Item");
                 character.inventory.slots[slot] = item;
-                return (item);
             }
             else
             {
-                character.inventory.slots[slot].number++;
-                DBManager.Update("Item", "number = " + character.inventory.slots[slot].number, "slot = " + slot);
-                return (character.inventory.slots[slot]);
+                item = character.inventory.slots[slot];
+                item.number += quantity > 1 ? quantity : 1;
+                DBManager.Update("Item", "number = " + item.number, "id = " + item.id);
             }
         }
-        return (null);
+        return (item);
+    }
+
+    public static void RemoveItem(Item item, Character character, int quantity = 1)
+    {
+        if (item != null && character.inventory.slots[item.slot] != null)
+        {
+            if (item.canStack && item.number - quantity > 0)
+            {
+                item.number -= quantity;
+                DBManager.Update("Item", "number = " + item.number, "id = " + item.id);
+            }
+            else
+            {
+                character.inventory.slots[item.slot] = null;
+                DBManager.Delete("Item", "id = " + item.id);
+            }
+        }
     }
 
     private static void GenerateStats(ref List<Effect> stats)
