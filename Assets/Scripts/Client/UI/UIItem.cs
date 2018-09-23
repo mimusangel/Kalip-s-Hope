@@ -4,9 +4,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-public class UIItem : MonoBehaviour, IPointerDownHandler, IPointerEnterHandler, IPointerExitHandler {
+public class UIItem : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerEnterHandler, IPointerExitHandler {
 
     public Item item;
+    public int slot;
     private Image _spriteImage;
     private UIItem _selectedItem;
     private Text _number;
@@ -25,7 +26,7 @@ public class UIItem : MonoBehaviour, IPointerDownHandler, IPointerEnterHandler, 
         if (this.item != null)
         {
             _spriteImage.color = Color.white;
-            _spriteImage.sprite = Resources.Load<Sprite>("Sprites/UI/Items/" + item.template); //item.icon;
+            _spriteImage.sprite = Resources.Load<Sprite>("Sprites/UI/Items/" + item.template);
             if (item.number > 1)
                 _number.text = item.number.ToString();
             else
@@ -40,29 +41,40 @@ public class UIItem : MonoBehaviour, IPointerDownHandler, IPointerEnterHandler, 
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (this.item != null)
+        if (_selectedItem.item == null && this.item != null)
         {
-            if (_selectedItem.item != null)
+            _selectedItem.UpdateItem(this.item);
+            UpdateItem(null);
+        }
+    }
+
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        if (_selectedItem.item != null)
+        {
+            UIItem pointed = UIInventory.instance.PointedSlot();
+            if (pointed != null && pointed.slot != slot)
             {
-                Item clone = new Item(_selectedItem.item);
-                _selectedItem.UpdateItem(this.item);
-                UpdateItem(clone);
+                ClientSocketScript css = GameManager.instance.GetComponent<ClientSocketScript>();
+                css.Send(
+                    PacketHandler.newPacket(PacketHandler.PacketID_MoveItem,
+                        _selectedItem.item.slot,
+                        pointed.slot
+                    )
+                );
+                UIInventory.instance.inventory.SwapItem(_selectedItem.item.slot, pointed.slot);
+                UpdateItem(pointed.item);
+                pointed.UpdateItem(_selectedItem.item);
             }
             else
-            {
-                _selectedItem.UpdateItem(this.item);
-                UpdateItem(null);
-            }
-        }
-        else if (_selectedItem.item != null)
-        {
-            UpdateItem(_selectedItem.item);
+                UpdateItem(_selectedItem.item);
             _selectedItem.UpdateItem(null);
         }
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+        UIInventory.instance.pointedSlot = slot;
         if (this.item != null)
         {
             ItemTooltip.instance.GenerateTooltip(this.item);
@@ -71,6 +83,7 @@ public class UIItem : MonoBehaviour, IPointerDownHandler, IPointerEnterHandler, 
 
     public void OnPointerExit(PointerEventData eventData)
     {
+        UIInventory.instance.pointedSlot = -1;
         ItemTooltip.instance.gameObject.SetActive(false);
     }
 }

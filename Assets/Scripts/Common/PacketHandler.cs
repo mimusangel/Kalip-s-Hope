@@ -23,6 +23,7 @@ class PacketHandler {
 	public const int PacketID_CharacterSkillBook = 13; // Envoie la list des spells
 	public const int PacketID_AddItem = 20; // Ajouter un item
 	public const int PacketID_RemoveItem = 21; // Retirer un item
+	public const int PacketID_MoveItem = 22; // Déplace un item d'un slot à un autre
 
 	public const int PacketID_Chat = 50;
 	public const int PacketID_Popup = 51;

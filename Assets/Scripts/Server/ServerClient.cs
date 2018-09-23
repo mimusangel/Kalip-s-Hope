@@ -42,6 +42,8 @@ public class ServerClient {
 
 	public void Close()
 	{
+		if (characterSelected >= 0)
+			ItemManager.SaveItems(_characters[characterSelected]);
 		_characters.Clear();
 		connected = false;
 		Log("déconnecté!");
@@ -51,6 +53,13 @@ public class ServerClient {
 	{
 		if (characterSelected >= 0)
 			return _characters[characterSelected].name;
+		return null;
+	}
+
+	public Character GetCharacter()
+	{
+		if (characterSelected >= 0)
+			return _characters[characterSelected];
 		return null;
 	}
 

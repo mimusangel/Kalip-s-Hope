@@ -94,20 +94,20 @@ public static class ItemManager {
     //     Debug.Log(i + " Item sauvegardés.");
     // }
 
-    //Sauvegarde tous les Items d'un personnage vers la DB
-    // public static void SaveItems(int character)
-    // {
-    //     Dictionary<int, Item> items;
-
-    //     charactersItems.TryGetValue(character, out items);
-    //     DBManager.Prepare();
-    //     foreach (Item item in items.Values)
-    //     {
-    //         string formatedStats = Converter.FormatEffects(item.stats);
-    //         string insertValues = item.id + ", " + item.character + ", " + item.template + ", '" + formatedStats + "'";
-    //         DBManager.Replace("Item", "id, character, template, stats", insertValues);
-    //     }
-    //     DBManager.Commit();
-    //     Debug.Log(items.Count + " Item sauvegardés.");
-    // }
+    // Sauvegarde tous les Items d'un personnage vers la DB
+    public static void SaveItems(Character character)
+    {
+        DBManager.Prepare();
+        foreach (Item item in character.inventory.slots.Values)
+        {
+            if (item != null)
+            {
+                string formatedStats = Converter.FormatEffects(item.stats);
+                string insertValues = item.id + ", " + item.character + ", " + item.template + ", '" + formatedStats + "', " + item.number + ", " + item.slot;
+                DBManager.Replace("Item", "id, character, template, stats, number, slot", insertValues);
+            }
+        }
+        DBManager.Commit();
+        Debug.Log(character.inventory.itemNb + " Item sauvegardés.");
+    }
 }

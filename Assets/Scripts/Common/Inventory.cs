@@ -104,6 +104,25 @@ public class Inventory {
         }
     }
 
+    public bool IsValidSlot(int slot)
+    {
+        return (slot >= 0 && slot < size);
+    }
+
+    public void SwapItem(int slot1, int slot2)
+    {
+        if (IsValidSlot(slot1) && IsValidSlot(slot2))
+        {
+            Item tmp = slots[slot1];
+            if (slots[slot1] != null)
+                slots[slot1].slot = slot2;
+            if (slots[slot2] != null)
+                slots[slot2].slot = slot1;
+            slots[slot1] = slots[slot2];
+            slots[slot2] = tmp;
+        }
+    }
+
     /*
 	 * ************************** *
 	 * ***    SERVER SIDE     *** *

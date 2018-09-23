@@ -8,7 +8,8 @@ public class UIInventory : MonoBehaviour {
     public Dictionary<int, UIItem> uiItems = new  Dictionary<int, UIItem>();
     public GameObject slotPrefab;
     public Transform slotPanel;
-    private Inventory _inventory = null;
+    public Inventory inventory = null;
+    public int pointedSlot = -1;
 
     private void Awake()
     {
@@ -21,13 +22,15 @@ public class UIInventory : MonoBehaviour {
         for (int i = 0; i < size; i++)
         {
             GameObject slotInstance = Instantiate(slotPrefab, Vector3.zero, Quaternion.identity, slotPanel);
-            uiItems.Add(i, slotInstance.GetComponentInChildren<UIItem>());
+            UIItem uiitem = slotInstance.GetComponentInChildren<UIItem>();
+            uiitem.slot = i;
+            uiItems.Add(i, uiitem);
         }
     }
 
-    public void Initialize(Inventory inventory)
+    public void Initialize(Inventory inv)
 	{
-        _inventory = inventory;
+        inventory = inv;
 		InitializeSlots(inventory.size);
         foreach(Item item in inventory.slots.Values)
         {
@@ -43,16 +46,23 @@ public class UIInventory : MonoBehaviour {
 
     public void UpdateSlot(int slot)
     {
-        uiItems[slot].UpdateItem(_inventory.slots[slot]);
+        uiItems[slot].UpdateItem(inventory.slots[slot]);
     }
 
     public void AddItem(Item item)
     {
         if (item.slot == -1)
-            UpdateSlot(_inventory.FindAvaibleSlot(item), item);
+            UpdateSlot(inventory.FindAvaibleSlot(item), item);
         else
             UpdateSlot(item.slot, item);
 
+    }
+
+    public UIItem PointedSlot()
+    {
+        if (pointedSlot != -1)
+            return (uiItems[pointedSlot]);
+        return (null);
     }
 
     // public int FindSlot(Item item)

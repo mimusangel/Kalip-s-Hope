@@ -284,6 +284,7 @@ public class ServerSocketScript : SocketScript {
 		//Item Packet
 		// PacketHandler.packetList.Add(PacketHandler.PacketID_AddItem, Packet_AddItem); // Serv => Client
 		// PacketHandler.packetList.Add(PacketHandler.PacketID_RemoveItem, Packet_RemoveItem); // Serv => Client
+		PacketHandler.packetList.Add(PacketHandler.PacketID_MoveItem, Packet_MoveItem); // Serv <= Client
 
 
 		// Chat/Message/Popup
@@ -375,6 +376,19 @@ public class ServerSocketScript : SocketScript {
 		}
 	}
 	/* *** Character Packet *** */
+
+	/* *** Item Packet *** */
+
+	void Packet_MoveItem(Socket sender, Packet packet)
+	{ // (int, int)
+		if (!IsConnected(sender))
+			return ;
+		int slot1 = packet.ReadInt();
+		int slot2 = packet.ReadInt();
+		Character charac = _clientsTable[sender].GetCharacter();
+		charac.inventory.SwapItem(slot1, slot2);
+	}
+
 
 	/* *** Chat/Message/Popup *** */
 	void Packet_Chat(Socket sender, Packet packet)

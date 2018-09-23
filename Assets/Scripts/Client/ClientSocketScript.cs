@@ -134,6 +134,7 @@ public class ClientSocketScript : SocketScript {
 		//Item Packet
 		PacketHandler.packetList.Add(PacketHandler.PacketID_AddItem, Packet_AddItem); // Serv => Client
 		PacketHandler.packetList.Add(PacketHandler.PacketID_RemoveItem, Packet_RemoveItem); // Serv => Client
+		// PacketHandler.packetList.Add(PacketHandler.PacketID_MoveItem, Packet_MoveItem); // Serv <= Client
 
 		// Chat/Message/Popup
 		PacketHandler.packetList.Add(PacketHandler.PacketID_Chat, Packet_Chat); // Serv <=> Client (int, [int], string)
